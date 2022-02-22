@@ -18,6 +18,7 @@ jobs:
     - name: Upload Package to testPypi
       working-directory: /home/runner/work/stockeasy/stockeasy/
       env:
-        PYPI_TEST_UID: ${{ secrets.TWINE_UID }}
-        PYPI_TEST_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
-      run: twine upload --repository-url https://test.pypi.org/legacy/ dist/* -u TWINE_UID -p TWINE_PASSWORD
+        TWINE_USERNAME: ${{ secrets.TWINE_UID }}
+        TWINE_PASSWORD : ${{ secrets.TWINE_PASSWORD }}
+        TWINE_REPOSITORY_URL: https://test.pypi.org/legacy/
+      run: twine upload dist/*
