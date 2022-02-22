@@ -22,3 +22,18 @@ jobs:
         TWINE_PASSWORD : ${{ secrets.TWINE_PASSWORD }}
         TWINE_REPOSITORY_URL: https://test.pypi.org/legacy/
       run: twine upload dist/*
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v1
+    - name: Update Packages
+      run: sudo apt update
+    - name: Install Python
+      run: sudo apt install -y python3.8 python3-pip
+    - name: Install Wheel Requirements
+      working-directory: /home/runner/work/stockeasy/stockeasy/
+      run: pip install -r requirements.txt
+    - name: Install Stockeasy from testPyPi
+      working-directory: /home/runner/work/stockeasy/stockeasy/
+      run: pip install --index-url https://test.pypi.org/simple/ stockeasy
+      
