@@ -39,10 +39,11 @@ jobs:
       run: pip install --index-url https://test.pypi.org/simple/ stockeasy
     - name: Pre-Production Testing
       working-directory: /home/runner/work/stockeasy/stockeasy/
-      run: should fail
+      run: echo "Testing Here"
   deploy:
     runs-on: ubuntu-20.04
     needs: [build, test]
+    if: github.ref == 'refs/heads/master'
     steps:
     - uses: actions/checkout@v2
     - name: Update Packages
