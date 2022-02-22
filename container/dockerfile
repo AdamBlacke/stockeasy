@@ -1,0 +1,9 @@
+FROM python:3.8.12-slim
+
+COPY ../* /stockeasy
+WORKDIR /stockeasy
+
+RUN pip install -r requirements_dev.txt
+RUN python setup.py sdist bdist_wheel
+
+ENTRYPOINT [ "/bin/bash" ]
