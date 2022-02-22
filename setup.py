@@ -7,7 +7,7 @@ requirements = ["pandas==1.4.1"]
 
 setup(
     name="stockeasy",
-    version="0.0.10",
+    version="0.0.11",
     author="Adam Blacke",
     author_email="adamblacke@gmail.com",
     description="A package for a quick and dirty portfolio analysis.",

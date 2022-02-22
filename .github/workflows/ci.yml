@@ -44,5 +44,20 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [build, test]
     steps:
-        - name: Quick Echo
-          run: echo "Replace with twine push to PyPi proper"
+    - uses: actions/checkout@v2
+    - name: Update Packages
+      run: sudo apt update
+    - name: Install Python
+      run: sudo apt install -y python3.8 python3-pip
+    - name: Install Dev Requirements
+      working-directory: /home/runner/work/stockeasy/stockeasy/
+      run: pip install -r requirements_dev.txt
+    - name: Build Distro
+      working-directory: /home/runner/work/stockeasy/stockeasy/
+      run: python3 setup.py sdist bdist_wheel
+    - name: Upload Package to testPypi
+      working-directory: /home/runner/work/stockeasy/stockeasy/
+      env:
+        TWINE_USERNAME: ${{ secrets.TWINE_UID }}
+        TWINE_PASSWORD : ${{ secrets.TWINE_PASSWORD }}
+      run: twine upload dist/*
