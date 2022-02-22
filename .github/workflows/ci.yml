@@ -4,7 +4,7 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Update Packages
       run: sudo apt update
     - name: Install Python
@@ -25,7 +25,7 @@ jobs:
   test:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v1
+    #- uses: actions/checkout@v1
     - name: Update Packages
       run: sudo apt update
     - name: Install Python
@@ -36,4 +36,13 @@ jobs:
     - name: Install Stockeasy from testPyPi
       working-directory: /home/runner/work/stockeasy/stockeasy/
       run: pip install --index-url https://test.pypi.org/simple/ stockeasy
-      
+    - name: Pre-Production Testing
+      working-directory: /home/runner/work/stockeasy/stockeasy/
+      run: echo "Add Final Testing Here"
+  deploy:
+    runs-on: ubuntu-20.04
+    if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+    needs: [build, test]
+    steps:
+        - name: Quick Echo
+          run: echo "Replace with twine push to PyPi proper"
