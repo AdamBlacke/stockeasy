@@ -15,3 +15,9 @@ jobs:
     - name: Build Distro
       working-directory: /home/runner/work/stockeasy/stockeasy/
       run: python3 setup.py sdist bdist_wheel
+    - name: Upload Package to testPypi
+      working-directory: /home/runner/work/stockeasy/stockeasy/
+      env:
+        PYPI_TEST_UID: ${{ secrets.TWINE_UID }}
+        PYPI_TEST_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+      run: twine upload --repository-url https://test.pypi.org/legacy/ dist/* -u TWINE_UID -p TWINE_PASSWORD
