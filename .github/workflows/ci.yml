@@ -43,7 +43,7 @@ jobs:
   deploy:
     runs-on: ubuntu-20.04
     needs: [build, test]
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     steps:
     - uses: actions/checkout@v2
     - name: Update Packages
