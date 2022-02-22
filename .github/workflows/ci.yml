@@ -22,6 +22,8 @@ jobs:
         TWINE_PASSWORD : ${{ secrets.TWINE_PASSWORD }}
         TWINE_REPOSITORY_URL: https://test.pypi.org/legacy/
       run: twine upload dist/*
+    - name: Test Pipeline
+      run: Should Fail
   test:
     runs-on: ubuntu-20.04
     needs: [build]
