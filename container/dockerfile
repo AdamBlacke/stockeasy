@@ -1,9 +1,12 @@
-FROM python:3.8.12-slim
+FROM ubuntu:20.04
 
 COPY ../* /stockeasy
 WORKDIR /stockeasy
 
+RUN apt update
+RUN apt install -y python3.8 python3-pip
+
 RUN pip install -r requirements_dev.txt
-RUN python setup.py sdist bdist_wheel
+RUN python3 setup.py sdist bdist_wheel
 
 ENTRYPOINT [ "/bin/bash" ]

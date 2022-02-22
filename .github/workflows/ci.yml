@@ -2,12 +2,16 @@ name: CI
 on: [push]
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v1
-    - name: Run a one-line script
-      run: echo Hello, world!
-    - name: Run a multi-line script
-      run: |
-        echo Add other actions to build,
-        echo test, and deploy your project.
+    - name: Update Packages
+      run: apt update
+    - name: Install Python
+      run: apt install -y python3.8 python3-pip
+    - name: Install Dev Requirements
+      working-directory: /home/runner/work/stockeasy/stockeasy/
+      run: pip install -r requirements_dev.txt
+    - name: Build Distro
+      working-directory: /home/runner/work/stockeasy/stockeasy/
+      run: python3 setup.py sdist bdist_wheel
