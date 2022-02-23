@@ -15,6 +15,11 @@ jobs:
     - name: Build Distro
       working-directory: /home/runner/work/stockeasy/stockeasy/
       run: python3 setup.py sdist bdist_wheel
+    - name: Archive Version Info
+      uses: actions/upload-artifact@v2
+      with:
+        name: version-info
+        path: /home/runner/work/stockeasy/stockeasy/version_info.txt
     - name: Upload Package to testPypi
       working-directory: /home/runner/work/stockeasy/stockeasy/
       env:
@@ -34,9 +39,16 @@ jobs:
     - name: Install Wheel Requirements
       working-directory: /home/runner/work/stockeasy/stockeasy/
       run: pip install -r requirements.txt
+    - name: Download version info artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: version-info
+        path: /home/runner/work/stockeasy/stockeasy/
     - name: Install Stockeasy from testPyPi
       working-directory: /home/runner/work/stockeasy/stockeasy/
-      run: pip install --index-url https://test.pypi.org/simple/ stockeasy
+      run: |
+        VER_INFO=`cat version_info.txt`
+        pip install --index-url https://test.pypi.org/simple/ stockeasy==$VER_INFO
     - name: Pre-Production Testing
       working-directory: /home/runner/work/stockeasy/stockeasy/
       run: echo "Testing Here"
