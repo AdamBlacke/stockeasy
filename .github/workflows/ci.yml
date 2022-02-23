@@ -8,22 +8,26 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
-    - name: Update Packages
-      run: sudo apt update
     - name: Install Python
-      run: sudo apt install -y python3.8 python3-pip
-    - name: Install Dev Requirements
+      run: |
+        sudo apt update
+        sudo apt install -y python3.8 python3-pip
+
+    - name: Install Python dev requirements
       working-directory: ${{env.TOOL_DIRECTORY}}
       run: pip install -r requirements_dev.txt
-    - name: Build Distro
+
+    - name: Build Python distribution 
       working-directory: ${{env.TOOL_DIRECTORY}}
       run: python3 setup.py sdist bdist_wheel
+
     - name: Archive Version Info
       uses: actions/upload-artifact@v2
       with:
         name: version-info
         path: ${{env.TOOL_DIRECTORY}}version_info.txt
-    - name: Upload Package to testPypi
+
+    - name: Upload package to testPypi
       working-directory: ${{env.TOOL_DIRECTORY}}
       env:
         TWINE_USERNAME: ${{ secrets.TWINE_UID }}
@@ -36,45 +40,54 @@ jobs:
     needs: [build]
     steps:
     - uses: actions/checkout@v1
-    - name: Update Packages
-      run: sudo apt update
     - name: Install Python
-      run: sudo apt install -y python3.8 python3-pip
-    - name: Install Wheel Requirements
+      run: |
+        sudo apt update
+        sudo apt install -y python3.8 python3-pip
+
+    - name: Install tool requirements
       working-directory: ${{env.TOOL_DIRECTORY}}
       run: pip install -r requirements.txt
+
     - name: Download version info artifact
       uses: actions/download-artifact@v2
       with:
         name: version-info
         path: ${{env.TOOL_DIRECTORY}}
+
     - name: Install from testPyPi
       working-directory: ${{env.TOOL_DIRECTORY}}
       run: |
         VER_INFO=`cat version_info.txt`
         pip install --no-cache-dir --timeout 60 --index-url https://test.pypi.org/simple/ ${{env.TOOL_NAME}}==$VER_INFO || pip install --no-cache-dir --timeout 60 --index-url https://test.pypi.org/simple/ ${{env.TOOL_NAME}}==$VER_INFO
+
     - name: Pre-Production Testing
       working-directory: ${{env.TOOL_DIRECTORY}}
       run: echo "Testing Here"
+
   deploy:
     runs-on: ubuntu-20.04
     needs: [build, test]
     if: github.ref == 'refs/heads/main'
     steps:
     - uses: actions/checkout@v2
-    - name: Update Packages
-      run: sudo apt update
     - name: Install Python
-      run: sudo apt install -y python3.8 python3-pip
-    - name: Install Dev Requirements
+      run: |
+        sudo apt update
+        sudo apt install -y python3.8 python3-pip
+
+    - name: Install dev requirements
       working-directory: ${{env.TOOL_DIRECTORY}}
       run: pip install -r requirements_dev.txt
-    - name: Build Distro
+
+    - name: Build distribution
       working-directory: ${{env.TOOL_DIRECTORY}}
       run: python3 setup.py sdist bdist_wheel
-    - name: Upload Package to Pypi
+
+    - name: Upload package to Pypi
       working-directory: ${{env.TOOL_DIRECTORY}}
       env:
         TWINE_USERNAME: ${{ secrets.TWINE_UID }}
         TWINE_PASSWORD : ${{ secrets.TWINE_PASSWORD }}
       run: twine upload dist/*
+      
