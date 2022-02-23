@@ -46,10 +46,10 @@ jobs:
         path: /home/runner/work/stockeasy/stockeasy/
     - name: Display Patch
       working-directory: /home/runner/work/stockeasy/stockeasy/
-      run: export ver_info=(cat version_info.txt)
+      run: export VER_INFO=(cat version_info.txt)
     - name: Install Stockeasy from testPyPi
       working-directory: /home/runner/work/stockeasy/stockeasy/
-      run: pip install --index-url https://test.pypi.org/simple/ stockeasy:$ver_info
+      run: pip install --index-url https://test.pypi.org/simple/ stockeasy:VER_INFO
     - name: Pre-Production Testing
       working-directory: /home/runner/work/stockeasy/stockeasy/
       run: echo "Testing Here"
