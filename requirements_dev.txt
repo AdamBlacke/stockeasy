@@ -1,4 +1,6 @@
+flake8==4.0.1
 pandas==1.4.1
 pip==22.0.3
+pytest==7.0.1
 wheel==0.37.1
 twine==3.8.0
