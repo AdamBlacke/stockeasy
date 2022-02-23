@@ -1,4 +1,8 @@
 from setuptools import setup, find_packages
+from datetime import datetime
+
+now = datetime.now()
+date_time = now.strftime("%Y%m%d%H%M%S")
 
 with open("README.md", "r") as readme_file:
     readme = readme_file.read()
@@ -7,7 +11,7 @@ requirements = ["pandas==1.4.1"]
 
 setup(
     name="stockeasy",
-    version="0.0.13",
+    version="0.0." + date_time,
     author="Adam Blacke",
     author_email="adamblacke@gmail.com",
     description="A package for a quick and dirty portfolio analysis.",
