@@ -69,7 +69,7 @@ jobs:
     - name: Build Distro
       working-directory: /home/runner/work/stockeasy/stockeasy/
       run: python3 setup.py sdist bdist_wheel
-    - name: Upload Package to testPypi
+    - name: Upload Package to Pypi
       working-directory: /home/runner/work/stockeasy/stockeasy/
       env:
         TWINE_USERNAME: ${{ secrets.TWINE_UID }}
