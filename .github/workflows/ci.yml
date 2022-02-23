@@ -1,5 +1,7 @@
 name: CI
 on: [push]
+env:
+  TOOL_DIRECTORY: /home/runner/work/stockeasy/stockeasy/
 jobs:
   build:
     runs-on: ubuntu-20.04
@@ -10,10 +12,10 @@ jobs:
     - name: Install Python
       run: sudo apt install -y python3.8 python3-pip
     - name: Install Dev Requirements
-      working-directory: /home/runner/work/stockeasy/stockeasy/
+      working-directory: ${{env.TOOL_DIRECTORY}}
       run: pip install -r requirements_dev.txt
     - name: Build Distro
-      working-directory: /home/runner/work/stockeasy/stockeasy/
+      working-directory: ${{env.TOOL_DIRECTORY}}
       run: python3 setup.py sdist bdist_wheel
     - name: Archive Version Info
       uses: actions/upload-artifact@v2
@@ -21,7 +23,7 @@ jobs:
         name: version-info
         path: /home/runner/work/stockeasy/stockeasy/version_info.txt
     - name: Upload Package to testPypi
-      working-directory: /home/runner/work/stockeasy/stockeasy/
+      working-directory: ${{env.TOOL_DIRECTORY}}
       env:
         TWINE_USERNAME: ${{ secrets.TWINE_UID }}
         TWINE_PASSWORD : ${{ secrets.TWINE_PASSWORD }}
@@ -38,20 +40,20 @@ jobs:
     - name: Install Python
       run: sudo apt install -y python3.8 python3-pip
     - name: Install Wheel Requirements
-      working-directory: /home/runner/work/stockeasy/stockeasy/
+      working-directory: ${{env.TOOL_DIRECTORY}}
       run: pip install -r requirements.txt
     - name: Download version info artifact
       uses: actions/download-artifact@v2
       with:
         name: version-info
-        path: /home/runner/work/stockeasy/stockeasy/
+        path: ${{env.TOOL_DIRECTORY}}
     - name: Install Stockeasy from testPyPi
-      working-directory: /home/runner/work/stockeasy/stockeasy/
+      working-directory: ${{env.TOOL_DIRECTORY}}
       run: |
         VER_INFO=`cat version_info.txt`
         pip install --no-cache-dir --timeout 60 --index-url https://test.pypi.org/simple/ stockeasy==$VER_INFO
     - name: Pre-Production Testing
-      working-directory: /home/runner/work/stockeasy/stockeasy/
+      working-directory: ${{env.TOOL_DIRECTORY}}
       run: echo "Testing Here"
   deploy:
     runs-on: ubuntu-20.04
@@ -64,13 +66,13 @@ jobs:
     - name: Install Python
       run: sudo apt install -y python3.8 python3-pip
     - name: Install Dev Requirements
-      working-directory: /home/runner/work/stockeasy/stockeasy/
+      working-directory: ${{env.TOOL_DIRECTORY}}
       run: pip install -r requirements_dev.txt
     - name: Build Distro
-      working-directory: /home/runner/work/stockeasy/stockeasy/
+      working-directory: ${{env.TOOL_DIRECTORY}}
       run: python3 setup.py sdist bdist_wheel
     - name: Upload Package to Pypi
-      working-directory: /home/runner/work/stockeasy/stockeasy/
+      working-directory: ${{env.TOOL_DIRECTORY}}
       env:
         TWINE_USERNAME: ${{ secrets.TWINE_UID }}
         TWINE_PASSWORD : ${{ secrets.TWINE_PASSWORD }}
