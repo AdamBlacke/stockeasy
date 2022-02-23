@@ -2,6 +2,7 @@ name: CI
 on: [push]
 env:
   TOOL_DIRECTORY: /home/runner/work/stockeasy/stockeasy/
+  TOOL_NAME: stockeasy
 jobs:
   build:
     runs-on: ubuntu-20.04
@@ -47,11 +48,11 @@ jobs:
       with:
         name: version-info
         path: ${{env.TOOL_DIRECTORY}}
-    - name: Install Stockeasy from testPyPi
+    - name: Install from testPyPi
       working-directory: ${{env.TOOL_DIRECTORY}}
       run: |
         VER_INFO=`cat version_info.txt`
-        pip install --no-cache-dir --timeout 60 --index-url https://test.pypi.org/simple/ stockeasy==$VER_INFO
+        pip install --no-cache-dir --timeout 60 --index-url https://test.pypi.org/simple/ ${{env.TOOL_NAME}}==$VER_INFO
     - name: Pre-Production Testing
       working-directory: ${{env.TOOL_DIRECTORY}}
       run: echo "Testing Here"
