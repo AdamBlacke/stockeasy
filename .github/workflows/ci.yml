@@ -49,7 +49,7 @@ jobs:
       working-directory: /home/runner/work/stockeasy/stockeasy/
       run: |
         VER_INFO=`cat version_info.txt`
-        pip install --verbose --timeout 60 --index-url https://test.pypi.org/simple/ stockeasy==$VER_INFO
+        pip install --no-cache-dir --timeout 60 --index-url https://test.pypi.org/simple/ stockeasy==$VER_INFO
     - name: Pre-Production Testing
       working-directory: /home/runner/work/stockeasy/stockeasy/
       run: echo "Testing Here"
