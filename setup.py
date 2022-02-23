@@ -5,7 +5,7 @@ now = datetime.now()
 date_time = now.strftime("%Y%m%d%H%M%S")
 version_number = "0.0." + date_time
 
-with open("version_info", "w") as f:
+with open("version_info.txt", "w") as f:
     f.write(date_time)
 
 with open("README.md", "r") as readme_file:

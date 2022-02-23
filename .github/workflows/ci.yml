@@ -19,7 +19,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: version-info
-        path: /home/runner/work/stockeasy/stockeasy/version_info
+        path: /home/runner/work/stockeasy/stockeasy/version_info.txt
     - name: Upload Package to testPypi
       working-directory: /home/runner/work/stockeasy/stockeasy/
       env:
@@ -43,10 +43,10 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: version-info
-        path: /home/runner/work/stockeasy/stockeasy/version_info
+        path: /home/runner/work/stockeasy/stockeasy/
     - name: Display Patch
       working-directory: /home/runner/work/stockeasy/stockeasy/
-      run: cat version_info
+      run: cat version_info.txt
     - name: Install Stockeasy from testPyPi
       working-directory: /home/runner/work/stockeasy/stockeasy/
       run: pip install --index-url https://test.pypi.org/simple/ stockeasy
