@@ -48,6 +48,7 @@ jobs:
       working-directory: /home/runner/work/stockeasy/stockeasy/
       run: |
         VER_INFO=`cat version_info.txt`
+        sleep 60
         pip install --index-url https://test.pypi.org/simple/ stockeasy==$VER_INFO
     - name: Pre-Production Testing
       working-directory: /home/runner/work/stockeasy/stockeasy/
