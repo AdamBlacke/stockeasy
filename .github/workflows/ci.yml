@@ -1,27 +1,40 @@
 name: CI
 on: [push]
+env:
+  TOOL_DIRECTORY: /home/runner/work/stockeasy/stockeasy/
+  TOOL_NAME: stockeasy
 jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
-    - name: Update Packages
-      run: sudo apt update
     - name: Install Python
-      run: sudo apt install -y python3.8 python3-pip
-    - name: Install Dev Requirements
-      working-directory: /home/runner/work/stockeasy/stockeasy/
+      run: |
+        sudo apt update
+        sudo apt install -y python3.8 python3-pip
+
+    - name: Install Python dev requirements
+      working-directory: ${{env.TOOL_DIRECTORY}}
       run: pip install -r requirements_dev.txt
-    - name: Build Distro
-      working-directory: /home/runner/work/stockeasy/stockeasy/
+
+    - name: Build Python distribution 
+      working-directory: ${{env.TOOL_DIRECTORY}}
       run: python3 setup.py sdist bdist_wheel
+
+    - name: Archive Distribution
+      uses: actions/upload-artifact@v2
+      with:
+        name: distribution
+        path: ${{env.TOOL_DIRECTORY}}dist/*
+
     - name: Archive Version Info
       uses: actions/upload-artifact@v2
       with:
         name: version-info
-        path: /home/runner/work/stockeasy/stockeasy/version_info.txt
-    - name: Upload Package to testPypi
-      working-directory: /home/runner/work/stockeasy/stockeasy/
+        path: ${{env.TOOL_DIRECTORY}}version_info.txt
+
+    - name: Upload package to testPypi
+      working-directory: ${{env.TOOL_DIRECTORY}}
       env:
         TWINE_USERNAME: ${{ secrets.TWINE_UID }}
         TWINE_PASSWORD : ${{ secrets.TWINE_PASSWORD }}
@@ -33,44 +46,54 @@ jobs:
     needs: [build]
     steps:
     - uses: actions/checkout@v1
-    - name: Update Packages
-      run: sudo apt update
     - name: Install Python
-      run: sudo apt install -y python3.8 python3-pip
-    - name: Install Wheel Requirements
-      working-directory: /home/runner/work/stockeasy/stockeasy/
+      run: |
+        sudo apt update
+        sudo apt install -y python3.8 python3-pip
+
+    - name: Install tool requirements
+      working-directory: ${{env.TOOL_DIRECTORY}}
       run: pip install -r requirements.txt
+
     - name: Download version info artifact
       uses: actions/download-artifact@v2
       with:
         name: version-info
-        path: /home/runner/work/stockeasy/stockeasy/
-    - name: Install Stockeasy from testPyPi
-      working-directory: /home/runner/work/stockeasy/stockeasy/
+        path: ${{env.TOOL_DIRECTORY}}
+
+    - name: Install from testPyPi
+      working-directory: ${{env.TOOL_DIRECTORY}}
       run: |
         VER_INFO=`cat version_info.txt`
-        pip install --no-cache-dir --timeout 60 --index-url https://test.pypi.org/simple/ stockeasy==$VER_INFO
+        pip install --no-cache-dir --timeout 60 --index-url https://test.pypi.org/simple/ ${{env.TOOL_NAME}}==$VER_INFO || pip install --no-cache-dir --timeout 60 --index-url https://test.pypi.org/simple/ ${{env.TOOL_NAME}}==$VER_INFO
+
     - name: Pre-Production Testing
-      working-directory: /home/runner/work/stockeasy/stockeasy/
+      working-directory: ${{env.TOOL_DIRECTORY}}
       run: echo "Testing Here"
+
   deploy:
     runs-on: ubuntu-20.04
     needs: [build, test]
     if: github.ref == 'refs/heads/main'
     steps:
     - uses: actions/checkout@v2
-    - name: Update Packages
-      run: sudo apt update
     - name: Install Python
-      run: sudo apt install -y python3.8 python3-pip
-    - name: Install Dev Requirements
-      working-directory: /home/runner/work/stockeasy/stockeasy/
+      run: |
+        sudo apt update
+        sudo apt install -y python3.8 python3-pip
+
+    - name: Install dev requirements
+      working-directory: ${{env.TOOL_DIRECTORY}}
       run: pip install -r requirements_dev.txt
-    - name: Build Distro
-      working-directory: /home/runner/work/stockeasy/stockeasy/
-      run: python3 setup.py sdist bdist_wheel
-    - name: Upload Package to Pypi
-      working-directory: /home/runner/work/stockeasy/stockeasy/
+
+    - name: Download distribution
+      uses: actions/download-artifact@v2
+      with:
+        name: distribution
+        path: ${{env.TOOL_DIRECTORY}}dist
+
+    - name: Upload package to Pypi
+      working-directory: ${{env.TOOL_DIRECTORY}}
       env:
         TWINE_USERNAME: ${{ secrets.TWINE_UID }}
         TWINE_PASSWORD : ${{ secrets.TWINE_PASSWORD }}
