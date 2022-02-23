@@ -21,6 +21,12 @@ jobs:
       working-directory: ${{env.TOOL_DIRECTORY}}
       run: python3 setup.py sdist bdist_wheel
 
+    - name: Archive Distribution
+      uses: actions/upload-artifact@v2
+      with:
+        name: distribution
+        path: ${{env.TOOL_DIRECTORY}}dist/*
+
     - name: Archive Version Info
       uses: actions/upload-artifact@v2
       with:
@@ -80,9 +86,11 @@ jobs:
       working-directory: ${{env.TOOL_DIRECTORY}}
       run: pip install -r requirements_dev.txt
 
-    - name: Build distribution
-      working-directory: ${{env.TOOL_DIRECTORY}}
-      run: python3 setup.py sdist bdist_wheel
+    - name: Download distribution
+      uses: actions/download-artifact@v2
+      with:
+        name: distribution
+        path: ${{env.TOOL_DIRECTORY}}dist
 
     - name: Upload package to Pypi
       working-directory: ${{env.TOOL_DIRECTORY}}
@@ -90,4 +98,3 @@ jobs:
         TWINE_USERNAME: ${{ secrets.TWINE_UID }}
         TWINE_PASSWORD : ${{ secrets.TWINE_PASSWORD }}
       run: twine upload dist/*
-      
