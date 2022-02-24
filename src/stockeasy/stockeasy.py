@@ -10,9 +10,9 @@ def analyzer(config: dict, data: dict, logger: object):
         None
     """
     # Type Check
-    if (isinstance(config, dict)):
+    if (not isinstance(config, dict)):
         return 1
-    if (isinstance(data, dict)):
+    if (not isinstance(data, dict)):
         return 1
 
     print(r'Hello World')
