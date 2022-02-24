@@ -19,13 +19,13 @@ jobs:
 
     - name: Lint Python code (flake8)
       working-directory: ${{env.TOOL_DIRECTORY}}
-      run: flake8 --ignore=F401,E501
+      run: doit lint
 
     - name: Python code test (from local install)
       working-directory: ${{env.TOOL_DIRECTORY}}
       run: |
-        python3 -m pip install -e .
-        pytest -v
+        doit setup_tool
+        doit unit_tests
 
     - name: Build Python distribution 
       working-directory: ${{env.TOOL_DIRECTORY}}
