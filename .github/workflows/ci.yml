@@ -19,14 +19,14 @@ jobs:
 
     - name: Lint Python Code
       working-directory: ${{env.TOOL_DIRECTORY}}
-      run: flake8 --ignore=F401
+      run: flake8 --ignore=F401,E501
 
     - name: Python Code Test
       working-directory: ${{env.TOOL_DIRECTORY}}
       run: |
         python3 -m pip install -e .
         pytest -v
-        
+
     - name: Build Python distribution 
       working-directory: ${{env.TOOL_DIRECTORY}}
       run: python3 setup.py sdist bdist_wheel

@@ -7,6 +7,6 @@ def test_init():
 
 
 def test_analyzer_inputs():
-    assert stockeasy.analyzer({'setting':1}, {'input':[]}, logging.getLogger('test-logger')) == 0
-    assert stockeasy.analyzer('', {'input':[]}, logging.getLogger('test-logger')) == 1
-    assert stockeasy.analyzer({'setting':1}, '', logging.getLogger('test-logger')) == 1
+    assert stockeasy.analyzer({'setting': 1}, {'input': []}, logging.getLogger('test-logger')) == 0
+    assert stockeasy.analyzer('', {'input': []}, logging.getLogger('test-logger')) == 1
+    assert stockeasy.analyzer({'setting': 1}, '', logging.getLogger('test-logger')) == 1
