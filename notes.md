@@ -1,5 +1,7 @@
 ```
 docker build -f ./container/dockerfile . -t stockeasy:develop
+docker run -v C:\Users\ablac\OneDrive\Documents\stockeasy\:/stockeasy -it stockeasy:develop 
+pip install -e .
 
 pip install -r requirements_dev.txt
 python setup.py sdist bdist_wheel
