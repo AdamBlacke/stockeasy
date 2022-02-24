@@ -1,1 +1,1 @@
-from stockeasy.stockeasy import *
+from stockeasy.stockeasy import analyzer

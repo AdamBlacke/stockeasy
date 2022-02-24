@@ -4,7 +4,6 @@ COPY requirements_dev.txt .
 
 RUN apt update
 RUN apt install -y python3.8 python3-pip
-RUN apt install python3.8-venv
 RUN pip install -r requirements_dev.txt
 
 

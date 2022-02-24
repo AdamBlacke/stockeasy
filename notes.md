@@ -1,7 +1,8 @@
 ```
 docker build -f ./container/dockerfile . -t stockeasy:develop
 docker run -v C:\Users\ablac\OneDrive\Documents\stockeasy\:/stockeasy -it stockeasy:develop 
-pip install -e .
+python3 -m pip install -e .
+flake8 --ignore=F401
 
 pip install -r requirements_dev.txt
 python setup.py sdist bdist_wheel
