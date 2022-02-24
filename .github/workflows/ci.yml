@@ -17,6 +17,16 @@ jobs:
       working-directory: ${{env.TOOL_DIRECTORY}}
       run: pip install -r requirements_dev.txt
 
+    - name: Lint Python code (flake8)
+      working-directory: ${{env.TOOL_DIRECTORY}}
+      run: flake8 --ignore=F401,E501
+
+    - name: Python code test (from local install)
+      working-directory: ${{env.TOOL_DIRECTORY}}
+      run: |
+        python3 -m pip install -e .
+        pytest -v
+
     - name: Build Python distribution 
       working-directory: ${{env.TOOL_DIRECTORY}}
       run: python3 setup.py sdist bdist_wheel
@@ -67,7 +77,7 @@ jobs:
         VER_INFO=`cat version_info.txt`
         pip install --no-cache-dir --timeout 60 --index-url https://test.pypi.org/simple/ ${{env.TOOL_NAME}}==$VER_INFO || pip install --no-cache-dir --timeout 60 --index-url https://test.pypi.org/simple/ ${{env.TOOL_NAME}}==$VER_INFO
 
-    - name: Pre-Production Testing
+    - name: Pre-Production Final Test
       working-directory: ${{env.TOOL_DIRECTORY}}
       run: echo "Testing Here"
 
