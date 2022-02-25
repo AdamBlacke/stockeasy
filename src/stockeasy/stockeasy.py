@@ -1,4 +1,9 @@
-def analyzer(config: dict, data: dict, logger: object):
+import pandas as pd
+import logging
+from . import utils
+
+
+def analyzer(data: dict = {}, config: dict = {}, logger: object = logging.getLogger('default')):
     """
     This function completes a review of a provide stock portfolio.
 
@@ -6,15 +11,13 @@ def analyzer(config: dict, data: dict, logger: object):
         config (dict): Configurable Options
         data (dict): Dictionary of named Pandas Dataframes
         logger (object): Standard Python Logger
+
     Returns:
-        None
+        Results(dict): Dictionary of output pandas dataframes
     """
-    # Type Check
-    if (not isinstance(config, dict)):
-        return 1
-    if (not isinstance(data, dict)):
-        return 1
+    utils.validate_input_contract(data=data, config=config, logger=logger)
 
-    print(r'Hello World')
-
-    return 0
+    return {
+        'output': data.get('input'),
+        'report': pd.DataFrame(['<html><body>passthrough used</body></html>'], columns=['report']),
+    }
