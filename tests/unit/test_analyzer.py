@@ -5,7 +5,7 @@ import logging
 import pandas as pd
 
 
-df_stocklist = pd.DataFrame(['vtsax'], columns=['symbol'])
+df_stocklist = pd.DataFrame(['vtsax', 'msft'], columns=['symbol'])
 
 
 def test_init():
@@ -54,3 +54,13 @@ def test_analyzer_passthrough():
     # default state is to act as a testing passthrough
     results = stockeasy.analyzer({'input': df_stocklist})
     assert results.get('output').equals(df_stocklist)
+
+
+def test_analyzer_data_collection():
+    config = {
+        'method': 'getDetails',
+        'dataFields': ['exchange', 'symbol', 'shortName', 'sector', 'country', 'marketCap']
+    }
+    results = stockeasy.analyzer({'input': df_stocklist}, config=config)
+    for item in results:
+        assert isinstance(results.get(item), pd.DataFrame)
