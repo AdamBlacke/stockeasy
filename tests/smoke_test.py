@@ -6,4 +6,4 @@ config = {'method': 'getDetails', 'dataFields': ['exchange', 'symbol', 'shortNam
 
 results = stockeasy.analyzer({'input': df_stocklist}, config=config)
 
-results.get('output').head()
+print(results.get('output').head())
