@@ -21,7 +21,6 @@ def get_info(data: dict = {}, config: dict = {}, logger: object = logging.getLog
     # Set required Parameters
     columns_list = config.setdefault('dataFields', ['exchange', 'symbol', 'shortName', 'sector', 'country', 'marketCap'])
     symbolField = config.setdefault('symbolField', 'symbol')
-    # sharesField = config.get('sharesField')
     df_input = data.setdefault('input', pd.DataFrame(columns=['symbol']))
 
     raw_data = []

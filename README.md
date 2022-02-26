@@ -39,6 +39,8 @@ then run
 
 ```
 make DOCKER
+cd stockeasy
+doit
 ```
 
 ### Available doit tasks

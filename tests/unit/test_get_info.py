@@ -5,7 +5,7 @@ import logging
 import pandas as pd
 
 
-df_stocklist = pd.DataFrame([['vtsax', 120], ['msft', 100]], columns=['symbol', 'sharesOwned'])
+df_stocklist = pd.DataFrame([['VTSAX', 120], ['MSFT', 100]], columns=['symbol', 'sharesOwned'])
 df_stocklist_meta = pd.DataFrame(columns=['symbol', 'sharesOwned'])
 
 
@@ -51,12 +51,55 @@ def test_get_info_results_typecheck():
         assert isinstance(results.get(item), pd.DataFrame)
 
 
-def test_get_info_data_collection():
+def test_get_info_verify_results():
     config = {
         'symbolField': 'symbol',
         'sharesField': 'sharesOwned',
-        'dataFields': ['exchange', 'symbol', 'shortName', 'sector', 'country', 'marketCap']
+        'dataFields': ['symbol', 'shortName']
     }
+
+    df_expected_results = pd.DataFrame(
+        [
+            ['VTSAX', 120, 'Vanguard Total Stock Market Ind'],
+            ['MSFT', 100, 'Microsoft Corporation']
+        ],
+        columns=['symbol', 'sharesOwned', 'shortName']
+    )
+
+    # Verify Run
     results = stockeasy.get_info({'input': df_stocklist}, config=config)
     for item in results:
         assert isinstance(results.get(item), pd.DataFrame)
+
+    print(results.get('output').head())
+
+    # Verify Results Match expectations
+    assert results.get('output').equals(df_expected_results)
+
+
+@pytest.mark.skip(reason="will patch later, presently mixed case is not supported")
+def test_get_info_verify_results_lower_case():
+    df_stocklist_lower = pd.DataFrame([['vtsax', 120], ['msft', 100]], columns=['symbol', 'sharesOwned'])
+    config = {
+        'symbolField': 'symbol',
+        'sharesField': 'sharesOwned',
+        'dataFields': ['symbol', 'shortName']
+    }
+
+    df_expected_results = pd.DataFrame(
+        [
+            ['vtsax', 120, 'Vanguard Total Stock Market Ind'],
+            ['msft', 100, 'Microsoft Corporation']
+        ],
+        columns=['symbol', 'sharesOwned', 'shortName']
+    )
+
+    # Verify Run
+    results = stockeasy.get_info({'input': df_stocklist_lower}, config=config)
+    for item in results:
+        assert isinstance(results.get(item), pd.DataFrame)
+
+    print(results.get('output').head())
+
+    # Verify Results Match expectations
+    assert results.get('output').equals(df_expected_results)
