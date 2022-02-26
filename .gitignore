@@ -132,3 +132,6 @@ dmypy.json
 
 # Custom Ignore
 version_info.txt
+.doit.db
+.doit.db.db
+doit.egg-info
