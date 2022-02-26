@@ -5,7 +5,8 @@ import logging
 import pandas as pd
 
 
-df_stocklist = pd.DataFrame(['vtsax', 'msft'], columns=['symbol'])
+df_stocklist = pd.DataFrame([['vtsax', 120], ['msft', 100]], columns=['symbol', 'sharesOwned'])
+df_stocklist_meta = pd.DataFrame(columns=['symbol', 'sharesOwned'])
 
 
 def test_init():
@@ -30,7 +31,7 @@ def test_analyzer_config_typecheck():
 
     # expected data type passed
     results = stockeasy.analyzer(config={'setting 1': 'Anything'})
-    assert results.get('output') is None
+    assert isinstance(results.get('output'), pd.DataFrame)
 
 
 def test_analyzer_logger_typecheck():
@@ -40,7 +41,7 @@ def test_analyzer_logger_typecheck():
 
     # expected data type passed
     results = stockeasy.analyzer(logger=logging.getLogger('log'))
-    assert results.get('output') is None
+    assert isinstance(results.get('output'), pd.DataFrame)
 
 
 def test_analyzer_results_typecheck():
@@ -50,15 +51,10 @@ def test_analyzer_results_typecheck():
         assert isinstance(results.get(item), pd.DataFrame)
 
 
-def test_analyzer_passthrough():
-    # default state is to act as a testing passthrough
-    results = stockeasy.analyzer({'input': df_stocklist})
-    assert results.get('output').equals(df_stocklist)
-
-
 def test_analyzer_data_collection():
     config = {
-        'method': 'getDetails',
+        'symbolField': 'symbol',
+        'sharesField': 'sharesOwned',
         'dataFields': ['exchange', 'symbol', 'shortName', 'sector', 'country', 'marketCap']
     }
     results = stockeasy.analyzer({'input': df_stocklist}, config=config)

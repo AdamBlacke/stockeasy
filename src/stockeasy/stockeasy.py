@@ -18,29 +18,34 @@ def analyzer(data: dict = {}, config: dict = {}, logger: object = logging.getLog
     """
     utils.validate_input_contract(data=data, config=config, logger=logger)
 
-    if (config.get('method') == 'getDetails'):
+    # Set required Parameters
+    columns_list = config.setdefault('dataFields', ['exchange', 'symbol', 'shortName', 'sector', 'country', 'marketCap'])
+    symbolField = config.setdefault('symbolField', 'symbol')
+    # sharesField = config.get('sharesField')
+    df_input = data.setdefault('input', pd.DataFrame(columns=['symbol']))
 
-        columns_list = config.get('dataFields')
-        raw_data = []
+    raw_data = []
 
-        for index, row in data.get('input').iterrows():
-            stock_symbol = row['symbol']
-            stock_info = yf.Ticker(stock_symbol).info
+    for index, row in df_input.iterrows():
+        stock_symbol = row[symbolField]
+        stock_info = yf.Ticker(stock_symbol).info
 
-            stock_data = []
-            for column in columns_list:
-                stock_data.append(stock_info.get(column))
-            raw_data.append(stock_data)
+        stock_data = []
+        for column in columns_list:
+            stock_data.append(stock_info.get(column))
+        raw_data.append(stock_data)
 
-        df_stock_data = pd.DataFrame(data=raw_data, columns=columns_list)
+    df_stock_info = pd.DataFrame(data=raw_data, columns=columns_list)
 
-        return {
-            'output': df_stock_data,
-            'report': pd.DataFrame(['<html><body>passthrough used</body></html>'], columns=['report']),
-        }
+    df_stock_data = pd.merge(
+        left=df_input,
+        right=df_stock_info,
+        how='inner',
+        left_on=symbolField,
+        right_on='symbol'
+    )
 
-    # Assume passthrough at this point
     return {
-        'output': data.get('input'),
-        'report': pd.DataFrame(['<html><body>passthrough used</body></html>'], columns=['report']),
+        'output': df_stock_data,
+        'report': pd.DataFrame(['<html><body>Update with render</body></html>'], columns=['report']),
     }
