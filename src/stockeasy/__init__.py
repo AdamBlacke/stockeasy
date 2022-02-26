@@ -1,1 +1,1 @@
-from stockeasy.stockeasy import analyzer
+from stockeasy.stockeasy import get_info

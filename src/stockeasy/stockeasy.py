@@ -4,7 +4,7 @@ from . import utils
 import yfinance as yf
 
 
-def analyzer(data: dict = {}, config: dict = {}, logger: object = logging.getLogger('default')):
+def get_info(data: dict = {}, config: dict = {}, logger: object = logging.getLogger('default')):
     """
     This function completes a review of a provide stock portfolio.
 

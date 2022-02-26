@@ -10,7 +10,7 @@ config = {
     'dataFields': ['exchange', 'symbol', 'shortName', 'sector', 'country', 'marketCap']
 }
 
-results = stockeasy.analyzer({'input': df_stocklist}, config=config)
+results = stockeasy.get_info({'input': df_stocklist}, config=config)
 
 print(results.get('output').head())
 
@@ -23,6 +23,6 @@ config = {
     'dataFields': ['exchange', 'symbol', 'shortName', 'sector', 'country', 'marketCap']
 }
 
-results = stockeasy.analyzer({'input': df_stocklist}, config=config)
+results = stockeasy.get_info({'input': df_stocklist}, config=config)
 
 print(results.get('output').head())

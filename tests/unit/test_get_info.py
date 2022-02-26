@@ -14,49 +14,49 @@ def test_init():
 
 
 # Default Contract Checks
-def test_analyzer_data_typecheck():
+def test_get_info_data_typecheck():
     # wrong data type passed
     with pytest.raises(TypeError):
-        stockeasy.analyzer(data=df_stocklist)
+        stockeasy.get_info(data=df_stocklist)
 
     # expected data type passed
-    results = stockeasy.analyzer(data={'input': df_stocklist})
+    results = stockeasy.get_info(data={'input': df_stocklist})
     assert isinstance(results.get('output'), pd.DataFrame)
 
 
-def test_analyzer_config_typecheck():
+def test_get_info_config_typecheck():
     # wrong data type passed
     with pytest.raises(TypeError):
-        stockeasy.analyzer(config='')
+        stockeasy.get_info(config='')
 
     # expected data type passed
-    results = stockeasy.analyzer(config={'setting 1': 'Anything'})
+    results = stockeasy.get_info(config={'setting 1': 'Anything'})
     assert isinstance(results.get('output'), pd.DataFrame)
 
 
-def test_analyzer_logger_typecheck():
+def test_get_info_logger_typecheck():
     # wrong data type passed
     with pytest.raises(TypeError):
-        stockeasy.analyzer(logger='')
+        stockeasy.get_info(logger='')
 
     # expected data type passed
-    results = stockeasy.analyzer(logger=logging.getLogger('log'))
+    results = stockeasy.get_info(logger=logging.getLogger('log'))
     assert isinstance(results.get('output'), pd.DataFrame)
 
 
-def test_analyzer_results_typecheck():
+def test_get_info_results_typecheck():
     # Verify only named dataframes are returned
-    results = stockeasy.analyzer(data={'input': df_stocklist})
+    results = stockeasy.get_info(data={'input': df_stocklist})
     for item in results:
         assert isinstance(results.get(item), pd.DataFrame)
 
 
-def test_analyzer_data_collection():
+def test_get_info_data_collection():
     config = {
         'symbolField': 'symbol',
         'sharesField': 'sharesOwned',
         'dataFields': ['exchange', 'symbol', 'shortName', 'sector', 'country', 'marketCap']
     }
-    results = stockeasy.analyzer({'input': df_stocklist}, config=config)
+    results = stockeasy.get_info({'input': df_stocklist}, config=config)
     for item in results:
         assert isinstance(results.get(item), pd.DataFrame)
