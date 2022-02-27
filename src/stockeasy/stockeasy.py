@@ -21,12 +21,12 @@ def get_info(data: dict = {}, config: dict = {}, logger: object = logging.getLog
     # Set required Parameters
     columns_list = config.setdefault('dataFields', ['exchange', 'symbol', 'shortName', 'sector', 'country', 'marketCap'])
     symbolField = config.setdefault('symbolField', 'symbol')
-    df_input = data.setdefault('input', pd.DataFrame(columns=['symbol']))
+    df_input = data.setdefault('input', pd.DataFrame(columns=[symbolField])).copy()
+    df_input[symbolField] = df_input[symbolField].str.upper()
 
     raw_data = []
 
-    for index, row in df_input.iterrows():
-        stock_symbol = row[symbolField]
+    for stock_symbol in df_input[symbolField].unique():
         stock_info = yf.Ticker(stock_symbol).info
 
         stock_data = []

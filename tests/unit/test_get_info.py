@@ -77,7 +77,6 @@ def test_get_info_verify_results():
     assert results.get('output').equals(df_expected_results)
 
 
-@pytest.mark.skip(reason="will patch later, presently mixed case is not supported")
 def test_get_info_verify_results_lower_case():
     df_stocklist_lower = pd.DataFrame([['vtsax', 120], ['msft', 100]], columns=['symbol', 'sharesOwned'])
     config = {
@@ -88,8 +87,8 @@ def test_get_info_verify_results_lower_case():
 
     df_expected_results = pd.DataFrame(
         [
-            ['vtsax', 120, 'Vanguard Total Stock Market Ind'],
-            ['msft', 100, 'Microsoft Corporation']
+            ['VTSAX', 120, 'Vanguard Total Stock Market Ind'],
+            ['MSFT', 100, 'Microsoft Corporation']
         ],
         columns=['symbol', 'sharesOwned', 'shortName']
     )
@@ -98,8 +97,6 @@ def test_get_info_verify_results_lower_case():
     results = stockeasy.get_info({'input': df_stocklist_lower}, config=config)
     for item in results:
         assert isinstance(results.get(item), pd.DataFrame)
-
-    print(results.get('output').head())
 
     # Verify Results Match expectations
     assert results.get('output').equals(df_expected_results)
