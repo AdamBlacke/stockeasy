@@ -4,7 +4,7 @@ from . import utils
 import yfinance as yf
 
 
-def get_info(data: dict = {}, config: dict = {}, logger: object = logging.getLogger('default')):
+def get_info(data: dict = {}, config: dict = {}, logger: object = logging.getLogger(__name__)):
     """
     This function completes a review of a provide stock portfolio.
 
@@ -27,6 +27,7 @@ def get_info(data: dict = {}, config: dict = {}, logger: object = logging.getLog
     raw_data = []
 
     for stock_symbol in df_input[symbolField].unique():
+        logger.info(f'Collecting Ticker {stock_symbol}')
         stock_info = yf.Ticker(stock_symbol).info
 
         stock_data = []
@@ -43,6 +44,10 @@ def get_info(data: dict = {}, config: dict = {}, logger: object = logging.getLog
         left_on=symbolField,
         right_on='symbol'
     )
+
+    if len(df_stock_data.index) > 0:
+        # show merge state only if there is data
+        logger.info('Merged Stock Info')
 
     return {
         'output': df_stock_data,

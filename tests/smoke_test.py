@@ -1,6 +1,13 @@
 import stockeasy
 import pandas as pd
 from time import time
+import logging
+
+# set logging
+FORMAT = '%(asctime)s %(message)s'
+logging.basicConfig(format=FORMAT, level=logging.INFO)
+logger = logging.getLogger(__name__)
+logger.info('Starting Smoke Test')
 
 # Metadata Run
 df_stocklist = pd.DataFrame(columns=['symbol', 'sharesOwned'])
@@ -14,7 +21,7 @@ config = {
 start_time = time()
 results = stockeasy.get_info({'input': df_stocklist}, config=config)
 end_time = time()
-print('executed in {(t2-t1):.4f}s')
+print(f'executed in {(end_time-start_time):.4f}s')
 print(results.get('output').head())
 
 # Data Run
