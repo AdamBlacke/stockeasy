@@ -84,7 +84,7 @@ def get_holdings(data: dict = {}, config: dict = {}, logger: object = logging.ge
         stock_info = yf.Ticker(stock_symbol).info
 
         for holding in stock_info.setdefault('holdings', {}):
-             holdings.append([stock_symbol, holding.get('symbol'), holding.get('holdingPercent')])
+            holdings.append([stock_symbol, holding.get('symbol'), holding.get('holdingPercent')])
 
     df_holdings = pd.DataFrame(data=holdings, columns=holdings_column_list)
 
