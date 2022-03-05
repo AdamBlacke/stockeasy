@@ -67,5 +67,6 @@ def test_get_holdings_verify_results():
 
     # Verify Results Match expectations
     assert df_results.columns.values.tolist() == expected_columns_list
-    assert len(df_results[df_results['parent']=='MSFT'].index) == 0
-    assert len(df_results[df_results['parent']=='VSTAX'].index) >= 9
+    assert len(df_results[df_results['parent'] == 'MSFT'].index) == 0
+    assert len(df_results[df_results['parent'] == 'VSTAX'].index) >= 9
+    assert len(df_results[df_results['symbol'] == 'AAPL'].index) == 1

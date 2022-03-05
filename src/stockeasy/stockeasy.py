@@ -30,7 +30,7 @@ def get_info(data: dict = {}, config: dict = {}, logger: object = logging.getLog
     raw_data = list()
 
     for stock_symbol in df_input[symbolField].unique():
-        logger.info(f'Collecting Ticker {stock_symbol}')
+        logger.info(f'Collecting Ticker {stock_symbol} information')
         stock_info = yf.Ticker(stock_symbol).info
 
         stock_data = []
@@ -79,12 +79,21 @@ def get_holdings(data: dict = {}, config: dict = {}, logger: object = logging.ge
 
     # Check to verify stock has holdings
     # This section will need to be replaced with a pull from ZACKs as yFinance limits to the top 10 holdings.
+    for stock_symbol in df_input[symbolField].unique():
+        logger.info(f'Collecting Ticker {stock_symbol} holdings')
+        stock_info = yf.Ticker(stock_symbol).info
 
-    # if stock_info.setdefault('holdings', None) is not None:
-    #   for holding in stock_info.get('holdings'):
-    #        holdings.append([stock_symbol, holding.get('symbol'), holding.get('holdingPercent')])
+        for holding in stock_info.setdefault('holdings', {}):
+             holdings.append([stock_symbol, holding.get('symbol'), holding.get('holdingPercent')])
 
     df_holdings = pd.DataFrame(data=holdings, columns=holdings_column_list)
+
+    # ensure that totals add to 100 Percent by adding other value
+    df_other_holdings = 1 - df_holdings.groupby(['parent']).sum()
+    df_other_holdings['symbol'] = None
+    df_other_holdings = df_other_holdings.reset_index()
+
+    df_holdings = pd.concat([df_holdings, df_other_holdings])
 
     return {
         'output': df_holdings

@@ -21,21 +21,30 @@ config = {
 start_time = time()
 results = stockeasy.get_info({'input': df_stocklist}, config=config)
 end_time = time()
-print(f'executed in {(end_time-start_time):.4f}s')
-print(results.get('output').head())
+logger.info(f'executed get_info metadata run in {(end_time-start_time):.4f}s')
+
+start_time = time()
+results = stockeasy.get_holdings({'input': df_stocklist}, config={'symbolField': 'symbol'})
+end_time = time()
+logger.info(f'executed get_holdings metadata run in {(end_time-start_time):.4f}s')
 
 # Data Run
-# df_stocklist = pd.DataFrame([['VTSAX', 120], ['MSFT', 100]], columns=['symbol', 'sharesOwned'])
-df_stocklist = pd.DataFrame([['vtsax', 120], ['msft', 100]], columns=['symbol', 'sharesOwned'])
+# Get Stock Information Smoke Test
+df_stocklist = pd.DataFrame([['vtsax', 120], ['msft', 100], ['swtsx', 100]], columns=['symbol', 'sharesOwned'])
 
 config = {
     'symbolField': 'symbol',
     'sharesField': 'sharesOwned',
-    'exploded': True,
     'dataFields': ['exchange', 'symbol', 'shortName', 'sector', 'country', 'marketCap']
 }
-
 results = stockeasy.get_info({'input': df_stocklist}, config=config)
 
-print(results.get('output'))
-# print(results.get('holdings'))
+# Get Stock Holdings Smoke Test
+config = {
+    'symbolField': 'symbol'
+}
+
+results = stockeasy.get_holdings({'input': df_stocklist}, config=config)
+# print(results.get('output'))
+
+logger.info('Completed Smoke Test.')
