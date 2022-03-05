@@ -100,3 +100,30 @@ def test_get_info_verify_results_lower_case():
 
     # Verify Results Match expectations
     assert results.get('output').equals(df_expected_results)
+
+def test_get_info_verify_results_exploded():
+    config = {
+        'symbolField': 'symbol',
+        'sharesField': 'sharesOwned',
+        'exploded': True,
+        'dataFields': ['symbol', 'shortName']
+    }
+
+    df_expected_results = pd.DataFrame(
+        [
+            ['', 'VTSAX', 120, 'Vanguard Total Stock Market Ind'],
+            ['VTSAX', 'MSFT', 10, 'Microsoft Corporation'],
+            ['','MSFT', 100, 'Microsoft Corporation']
+        ],
+        columns=['parent', 'symbol' 'sharesOwned', 'shortName']
+    )
+
+    # Verify Run
+    results = stockeasy.get_info({'input': df_stocklist}, config=config)
+    for item in results:
+        assert isinstance(results.get(item), pd.DataFrame)
+
+    print(results.get('output').head())
+
+    # Verify Results Match expectations
+    assert results.get('output').equals(df_expected_results)
