@@ -31,9 +31,11 @@ df_stocklist = pd.DataFrame([['vtsax', 120], ['msft', 100]], columns=['symbol', 
 config = {
     'symbolField': 'symbol',
     'sharesField': 'sharesOwned',
+    'exploded': True,
     'dataFields': ['exchange', 'symbol', 'shortName', 'sector', 'country', 'marketCap']
 }
 
 results = stockeasy.get_info({'input': df_stocklist}, config=config)
 
-print(results.get('output').head())
+print(results.get('output'))
+# print(results.get('holdings'))
