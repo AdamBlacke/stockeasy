@@ -74,7 +74,6 @@ def get_holdings(data: dict = {}, config: dict = {}, logger: object = logging.ge
     """
     utils.validate_input_contract(data=data, config=config, logger=logger)
     symbolField = config.setdefault('symbolField', 'symbol')
-    holdings = list()
     holdings_column_list = ['parent', 'symbol', 'as_of', 'sharesHeld', 'marketValue', 'holdingPercent', 'name', 'issue']
     url_list = config.setdefault('url', ["https://www.zacks.com/funds/mutual-fund/quote/{}/holding", "https://www.zacks.com/funds/etf/{}/holding"])
 
@@ -85,18 +84,24 @@ def get_holdings(data: dict = {}, config: dict = {}, logger: object = logging.ge
             'parser_field': r'(?:\")(.*?)(?:\")',
             'field_cleaners': [
                 r'(?:<span class=%22hoverquote-symbol%22>)(.*?)(?:<span)'
-            ]
+            ],
+            'field_list': ['parent', 'symbol', 'as_of', 'sharesHeld', 'marketValue', 'holdingPercent', 'name', 'issue']
         },
         "https://www.zacks.com/funds/etf/{}/holding": {
-            'parse_table': r'(?:etf_holdings.formatted_data.*?=.*?\[)(.*?)(?:\n)',
+            'parser_table': r'(?:etf_holdings.formatted_data.*?=.*?\[)(.*?)(?:\n)',
             'parser_row': r'(?:\[)(.*?)(?:\])',
-            'parser_field': r'',
+            'parser_field': r'(?:\")(.*?)(?:\")',
             'field_cleaners': [
                 r'(?:<span class=%22truncated_text_single%22.*?>)(.*?)(?:</span)',
                 r'(?:<span class=%22hoverquote-symbol%22>)(.*?)(?:<span)',
-            ]
+                r'(?:<a class=%22report_document newwin%22 href=%22)(.*?)(?:%22)'
+            ],
+            'field_list': ['parent', 'security_name', 'symbol', 'sharesHeld', 'holdingPercent', '52_WK', 'Report']
         }
     }
+
+    holdings = list()
+    df_holdings = pd.DataFrame(data=holdings, columns=holdings_column_list)
 
     df_input = data.setdefault('input', pd.DataFrame(columns=[symbolField])).copy()
     df_input[symbolField] = df_input[symbolField].str.upper()
@@ -105,6 +110,7 @@ def get_holdings(data: dict = {}, config: dict = {}, logger: object = logging.ge
     # This section will need to be replaced with a pull from ZACKs as yFinance limits to the top 10 holdings.
     for stock_symbol in df_input[symbolField].unique():
         logger.info(f'Collecting Ticker {stock_symbol} holdings')
+        holdings = list()
 
         # Connect Session
         with requests.Session() as req:
@@ -115,12 +121,19 @@ def get_holdings(data: dict = {}, config: dict = {}, logger: object = logging.ge
                 parser_row = url_extract_regex[url].get('parser_row')
                 parser_field = url_extract_regex[url].get('parser_field')
                 field_cleaners = url_extract_regex[url].get('field_cleaners')
+                field_list = url_extract_regex[url].get('field_list')
 
                 # Get data from website
                 request_result = req.get(url.format(stock_symbol))
 
                 # Extract Tables
-                logging.debug(f'parser settings:\n     Table: {parser_table}\n     Row: {parser_row}\n     Field: {parser_field}\n     Cleaner: {field_cleaners}\n')
+                logging.info(f'Checking {url.format(stock_symbol)}...\n')
+                logging.debug('parser settings:')
+                logging.debug(f'     Table: {parser_table}')
+                logging.debug(f'     Row: {parser_row}')
+                logging.debug(f'     Field: {parser_field}')
+                logging.debug(f'     Cleaner: {field_cleaners}')
+                logging.debug(f'     field_list: {field_list}')
 
                 # If parser exists
                 if parser_table:
@@ -128,6 +141,7 @@ def get_holdings(data: dict = {}, config: dict = {}, logger: object = logging.ge
 
                     # If tables are found
                     if len(tables) > 0:
+                        logging.info(f'{len(tables)} found...')
                         for table in tables:
                             rows = re.findall(parser_row, table)
                             for row in rows:
@@ -136,23 +150,31 @@ def get_holdings(data: dict = {}, config: dict = {}, logger: object = logging.ge
                                 row = str.replace(row, '\\"', "%22")
                                 fields = re.findall(parser_field, row)
                                 for field in fields:
+                                    temp_field = field
                                     # Apply data cleaner matching
                                     for cleaner in field_cleaners:
-                                        field_search = re.findall(cleaner, field)
+                                        field_search = re.findall(cleaner, temp_field)
                                         if len(field_search) > 0:
-                                            field = field_search[0]
-                                    row_data.append(field)
+                                            temp_field = field_search[0]
+                                    row_data.append(temp_field)
 
-                        # Parse raw data into List
-                        holdings.append(row_data)
+                                # Parse raw data into List
+                                holdings.append(row_data)
+                    else:
+                        logging.info('No data tables found.')
+                        holdings = list()
 
-    logging.debug(holdings)
-    df_holdings = pd.DataFrame(data=holdings, columns=holdings_column_list)
+                df_temp_holdings = pd.DataFrame(data=holdings, columns=field_list)
+                logging.debug(df_temp_holdings.head())
+                df_holdings = pd.concat([df_temp_holdings, df_holdings], ignore_index=True)
+
+    logging.info('Converting Values')
+    # df_holdings = pd.DataFrame(data=holdings, columns=holdings_column_list)
     df_holdings['marketValue'] = pd.to_numeric(df_holdings['marketValue'].replace(',', '', regex=True))
     df_holdings['holdingPercent'] = pd.to_numeric(df_holdings['holdingPercent'].replace('%', '', regex=True)) / 100
 
     df_holdings = df_holdings[['parent', 'symbol', 'holdingPercent']]
-    logging.info(df_holdings)
+    logging.debug(df_holdings)
 
     return {
         'output': df_holdings
