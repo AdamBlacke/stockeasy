@@ -17,18 +17,23 @@ def main(url):
             r = req.get(url.format(key))
             print(f"Extracting: {r.url}")
             # print(r.text)
-            tables = re.findall(r'(?:document.table_data.*?=.*?\[)(.*?)(?:\n)', r.text)
+            tables = re.findall(r'(?:etf_holdings.formatted_data.*?=.*?\[)(.*?)(?:\n)', r.text)
             for table in tables:
                 rows = re.findall(r'(?:\[)(.*?)(?:\])', table)
                 for row in rows:
+                    print('\n')
                     row = str.replace(row, '\\"', "%22")
                     fields = re.findall(r'(?:\")(.*?)(?:\")', row)
                     for field in fields:
-                        field_search = re.findall(r'(?:<span class=%22hoverquote-symbol%22>)(.*?)(?:<span)', field)
-                        if len(field_search) > 0:
-                            print(f'{field_search[0]}')
-                        else:
-                            print(field)
+                        field_cleaners = [
+                            r'(?:<span class=%22truncated_text_single%22.*?>)(.*?)(?:</span)',
+                            r'(?:<span class=%22hoverquote-symbol%22>)(.*?)(?:<span)',
+                        ]
+                        for cleaner in field_cleaners:
+                            field_search = re.findall(cleaner, field)
+                            if len(field_search) > 0:
+                                field = field_search[0]
+                        print(field)
 
 
 main("https://www.zacks.com/funds/mutual-fund/quote/{}/holding")

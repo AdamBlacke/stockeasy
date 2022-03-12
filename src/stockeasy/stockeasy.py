@@ -83,13 +83,18 @@ def get_holdings(data: dict = {}, config: dict = {}, logger: object = logging.ge
             'parser_table': r'(?:document.table_data.*?=.*?\[)(.*?)(?:\n)',
             'parser_row': r'(?:\[)(.*?)(?:\])',
             'parser_field': r'(?:\")(.*?)(?:\")',
-            'field_cleaner': r'(?:<span class=%22hoverquote-symbol%22>)(.*?)(?:<span)'
+            'field_cleaners': [
+                r'(?:<span class=%22hoverquote-symbol%22>)(.*?)(?:<span)'
+            ]
         },
         "https://www.zacks.com/funds/etf/{}/holding": {
             'parse_table': r'(?:etf_holdings.formatted_data.*?=.*?\[)(.*?)(?:\n)',
             'parser_row': r'(?:\[)(.*?)(?:\])',
             'parser_field': r'',
-            'field_cleaner': r'(.*)'
+            'field_cleaners': [
+                r'(?:<span class=%22truncated_text_single%22.*?>)(.*?)(?:</span)',
+                r'(?:<span class=%22hoverquote-symbol%22>)(.*?)(?:<span)',
+            ]
         }
     }
 
@@ -109,13 +114,13 @@ def get_holdings(data: dict = {}, config: dict = {}, logger: object = logging.ge
                 parser_table = url_extract_regex[url].get('parser_table')
                 parser_row = url_extract_regex[url].get('parser_row')
                 parser_field = url_extract_regex[url].get('parser_field')
-                field_cleaner = url_extract_regex[url].get('field_cleaner')
+                field_cleaners = url_extract_regex[url].get('field_cleaners')
 
                 # Get data from website
                 request_result = req.get(url.format(stock_symbol))
 
                 # Extract Tables
-                logging.debug(f'parser settings:\n     Table: {parser_table}\n     Row: {parser_row}\n     Field: {parser_field}\n     Cleaner: {field_cleaner}\n')
+                logging.debug(f'parser settings:\n     Table: {parser_table}\n     Row: {parser_row}\n     Field: {parser_field}\n     Cleaner: {field_cleaners}\n')
 
                 # If parser exists
                 if parser_table:
@@ -131,21 +136,23 @@ def get_holdings(data: dict = {}, config: dict = {}, logger: object = logging.ge
                                 row = str.replace(row, '\\"', "%22")
                                 fields = re.findall(parser_field, row)
                                 for field in fields:
-                                    field_search = re.findall(field_cleaner, field)
-                                    if len(field_search) > 0:
-                                        row_data.append(field_search[0])
-                                    else:
-                                        row_data.append(field)
+                                    # Apply data cleaner matching
+                                    for cleaner in field_cleaners:
+                                        field_search = re.findall(cleaner, field)
+                                        if len(field_search) > 0:
+                                            field = field_search[0]
+                                    row_data.append(field)
 
                         # Parse raw data into List
                         holdings.append(row_data)
 
-    logging.info(holdings)
+    logging.debug(holdings)
     df_holdings = pd.DataFrame(data=holdings, columns=holdings_column_list)
     df_holdings['marketValue'] = pd.to_numeric(df_holdings['marketValue'].replace(',', '', regex=True))
     df_holdings['holdingPercent'] = pd.to_numeric(df_holdings['holdingPercent'].replace('%', '', regex=True)) / 100
 
-    print(df_holdings)
+    df_holdings = df_holdings[['parent', 'symbol', 'holdingPercent']]
+    logging.info(df_holdings)
 
     return {
         'output': df_holdings
