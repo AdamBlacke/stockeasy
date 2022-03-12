@@ -30,7 +30,7 @@ logger.info(f'executed get_holdings metadata run in {(end_time-start_time):.4f}s
 
 # Data Run
 # Get Stock Information Smoke Test
-df_stocklist = pd.DataFrame([['vtsax', 120], ['msft', 100], ['swtsx', 100]], columns=['symbol', 'sharesOwned'])
+df_stocklist = pd.DataFrame([['vtsax', 120], ['msft', 100], ['swtsx', 100], ['xlu', 100]], columns=['symbol', 'sharesOwned'])
 
 config = {
     'symbolField': 'symbol',

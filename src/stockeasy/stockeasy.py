@@ -1,7 +1,10 @@
+from distutils.command.build import build
 import pandas as pd
 import logging
 from . import utils
 import yfinance as yf
+import requests
+import re
 
 
 def get_info(data: dict = {}, config: dict = {}, logger: object = logging.getLogger(__name__)) -> dict:
@@ -72,7 +75,23 @@ def get_holdings(data: dict = {}, config: dict = {}, logger: object = logging.ge
     utils.validate_input_contract(data=data, config=config, logger=logger)
     symbolField = config.setdefault('symbolField', 'symbol')
     holdings = list()
-    holdings_column_list = ['parent', 'symbol', 'holdingPercent']
+    holdings_column_list = ['parent', 'symbol', 'as_of', 'sharesHeld', 'marketValue', 'holdingPercent', 'name', 'issue']
+    url_list = config.setdefault('url', ["https://www.zacks.com/funds/mutual-fund/quote/{}/holding", "https://www.zacks.com/funds/etf/{}/holding"])
+
+    url_extract_regex = {
+        "https://www.zacks.com/funds/mutual-fund/quote/{}/holding": {
+            'parser_table': r'(?:document.table_data.*?=.*?\[)(.*?)(?:\n)',
+            'parser_row': r'(?:\[)(.*?)(?:\])',
+            'parser_field': r'(?:\")(.*?)(?:\")',
+            'field_cleaner': r'(?:<span class=%22hoverquote-symbol%22>)(.*?)(?:<span)'
+        },
+        "https://www.zacks.com/funds/etf/{}/holding": {
+            'parse_table': r'(?:etf_holdings.formatted_data.*?=.*?\[)(.*?)(?:\n)',
+            'parser_row': r'(?:\[)(.*?)(?:\])',
+            'parser_field': r'',
+            'field_cleaner': r'(.*)'
+        }
+    }
 
     df_input = data.setdefault('input', pd.DataFrame(columns=[symbolField])).copy()
     df_input[symbolField] = df_input[symbolField].str.upper()
@@ -81,19 +100,52 @@ def get_holdings(data: dict = {}, config: dict = {}, logger: object = logging.ge
     # This section will need to be replaced with a pull from ZACKs as yFinance limits to the top 10 holdings.
     for stock_symbol in df_input[symbolField].unique():
         logger.info(f'Collecting Ticker {stock_symbol} holdings')
-        stock_info = yf.Ticker(stock_symbol).info
 
-        for holding in stock_info.setdefault('holdings', {}):
-            holdings.append([stock_symbol, holding.get('symbol'), holding.get('holdingPercent')])
+        # Connect Session
+        with requests.Session() as req:
+            req.headers.update({"User-Agent": "Mozilla/5.0 (compatible; Bot/0.1; )"})
+            for url in url_list:
+                # url specific parser / builder
+                parser_table = url_extract_regex[url].get('parser_table')
+                parser_row = url_extract_regex[url].get('parser_row')
+                parser_field = url_extract_regex[url].get('parser_field')
+                field_cleaner = url_extract_regex[url].get('field_cleaner')
 
+                # Get data from website
+                request_result = req.get(url.format(stock_symbol))
+
+                # Extract Tables
+                logging.debug(f'parser settings:\n     Table: {parser_table}\n     Row: {parser_row}\n     Field: {parser_field}\n     Cleaner: {field_cleaner}\n')
+
+                # If parser exists
+                if parser_table:
+                    tables = re.findall(parser_table, request_result.text)
+
+                    # If tables are found
+                    if len(tables) > 0:
+                        for table in tables:
+                            rows = re.findall(parser_row, table)
+                            for row in rows:
+                                # Set parent symbol key
+                                row_data = [stock_symbol]
+                                row = str.replace(row, '\\"', "%22")
+                                fields = re.findall(parser_field, row)
+                                for field in fields:
+                                    field_search = re.findall(field_cleaner, field)
+                                    if len(field_search) > 0:
+                                        row_data.append(field_search[0])
+                                    else:
+                                        row_data.append(field)
+
+                        # Parse raw data into List
+                        holdings.append(row_data)
+
+    logging.info(holdings)
     df_holdings = pd.DataFrame(data=holdings, columns=holdings_column_list)
+    df_holdings['marketValue'] = pd.to_numeric(df_holdings['marketValue'].replace(',', '', regex=True))
+    df_holdings['holdingPercent'] = pd.to_numeric(df_holdings['holdingPercent'].replace('%', '', regex=True)) / 100
 
-    # ensure that totals add to 100 Percent by adding other value
-    df_other_holdings = 1 - df_holdings.groupby(['parent']).sum()
-    df_other_holdings['symbol'] = None
-    df_other_holdings = df_other_holdings.reset_index()
-
-    df_holdings = pd.concat([df_holdings, df_other_holdings])
+    print(df_holdings)
 
     return {
         'output': df_holdings
